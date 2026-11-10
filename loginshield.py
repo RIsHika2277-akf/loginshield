@@ -3,7 +3,7 @@ LoginShield (v0.1)
 A simple, beginner-friendly Python script to detect suspicious login activity
 by analyzing authentication logs for repeated failed login attempts.
 """
-
+import argparse
 # Standard library imports:
 # None required for v0.1, keeping the script lightweight and dependency-free.
 
@@ -15,6 +15,26 @@ by analyzing authentication logs for repeated failed login attempts.
 LOG_FILE = "sample_logs.txt"
 FAILED_THRESHOLD = 5
 VALID_STATUSES = {"SUCCESS", "FAILED"}
+def parse_arguments():
+    parser = argparse.ArgumentParser(
+        description="LoginShield - Suspicious Login Detection Tool"
+    )
+
+    parser.add_argument(
+        "--log-file",
+        type=str,
+        default=LOG_FILE,
+        help="Path to the authentication log file"
+    )
+
+    parser.add_argument(
+        "--threshold",
+        type=int,
+        default=FAILED_THRESHOLD,
+        help="Minimum failed attempts required to trigger an alert"
+    )
+
+    return parser.parse_args()
 
 
 def parse_log_line(line):
@@ -101,7 +121,7 @@ def analyze_log_file(file_path):
     return failed_attempts
 
 
-def display_security_report(failed_attempts, threshold):
+def display_security_report(failed_attempts, threshold, file_path):
     """
     CONCEPTS: Iteration (.items()), Conditionals (if/else), and Formatted Strings (f-strings).
     Evaluates failed login counts against the threshold and prints a formatted terminal audit report.
@@ -109,7 +129,7 @@ def display_security_report(failed_attempts, threshold):
     print("\n" + "=" * 60)
     print("               LOGINSHIELD SECURITY AUDIT REPORT")
     print("=" * 60)
-    print(f"Log File Analyzed     : {LOG_FILE}")
+    print(f"Log File Analyzed     : {file_path}")
     print(f"Alert Threshold       : >= {threshold} failed attempts")
     print("-" * 60)
 
@@ -136,14 +156,22 @@ def display_security_report(failed_attempts, threshold):
 
 def main():
     """
-    Entry point of the script. Coordinates reading logs, counting failures,
-    and printing the report.
+    Entry point of LoginShield.
+    Reads command-line arguments, analyzes logs,
+    and generates a security report.
     """
+    args = parse_arguments()
+
     print("[*] Starting LoginShield audit...")
-    failed_attempts = analyze_log_file(LOG_FILE)
+
+    failed_attempts = analyze_log_file(args.log_file)
 
     if failed_attempts is not None:
-        display_security_report(failed_attempts, FAILED_THRESHOLD)
+        display_security_report(
+            failed_attempts,
+            args.threshold,
+            args.log_file
+        )
 
 
 # CONCEPT: The 'if __name__ == "__main__":' guard
